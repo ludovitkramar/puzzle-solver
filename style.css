@@ -1,0 +1,74 @@
+* {
+    font-family: monospace;
+
+    margin: 0;
+    padding: 0;
+}
+
+fieldset {
+    margin: 0.6em;
+    padding: 0.4em;
+}
+
+#grid_painter {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e0e0e0;
+    user-select: none;
+}
+
+.grid-row {
+    display: flex;
+}
+
+.grid-cell {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #d0d0d0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: red;
+}
+
+.grid-cell[data-val="0"] {
+    background-color: #f9f9f9;
+}
+
+.grid-cell[data-val="1"] {
+    background-color: #333;
+}
+
+#all_shapes {
+    gap: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-container {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e0e0e0;
+    user-select: none;
+}
+
+.shape-previews {
+    display: flex;
+    gap: 4px;
+}
+
+.preview-row {
+    display: flex;
+}
+
+.preview-cell {
+    border: 1px solid #ddd;
+    width: 10px;
+    height: 10px;
+    background-color: #f9f9f9;
+}
+
+.preview-cell[data-active="true"] {
+    background-color: #333;
+}

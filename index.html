@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script defer type="module" src="main.js"></script>
+</head>
+
+<body>
+
+    <fieldset>
+        <legend>Solve</legend>
+        <button id="find_first">Find First</button>
+        <pre id="solve_log"></pre>
+    </fieldset>
+
+    <fieldset>
+        <legend>Grid</legend>
+
+        <label>
+            Width:
+            <input type="number" name="grid_size_w" value="10" id="grid_size_w">
+        </label>
+        <br />
+        <label>
+            Height:
+            <input type="number" name="grid_size_h" value="10" id="grid_size_h">
+        </label>
+        <br />
+
+        <button id="create-grid">Create</button>
+        <div id="grid_painter"></div>
+        <button id="save_grid">Save</button>
+    </fieldset>
+
+
+    <fieldset>
+        <legend>Shapes</legend>
+        <label>
+            Width:
+            <input type="number" name="shape_size_w" value="3" id="shape_size_w">
+        </label>
+        <br />
+        <label>
+            Height:
+            <input type="number" name="shape_size_h" value="2" id="shape_size_h">
+        </label>
+        <br />
+        <button id="clear_shapes">Delete All Shapes</button>
+        <button id="new_shape">New Shape</button>
+
+        <div id="shape_painter"></div>
+        <button id="save_shape">Done</button>
+
+        <div id="all_shapes"></div>
+
+    </fieldset>
+</body>
+
+</html>
