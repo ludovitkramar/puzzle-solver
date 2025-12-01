@@ -452,13 +452,84 @@ find_first.onclick = () => {
     }
 
     // display final board state
+    function get_neighbors(id) {
+        const ret = new Set();
+        for (let row = 0; row < b.h; row++) {
+            for (let col = 0; col < b.w; col++) {
+                const value = b.data[col + row * b.w];
+                if (value === id) {
+                    // left
+                    if (col > 0) {
+                        ret.add(b.data[col - 1 + row * b.w]);
+                    }
+
+                    // right
+                    if (col < b.w - 1) {
+                        ret.add(b.data[col + 1 + row * b.w]);
+                    }
+
+                    // top
+                    if (row > 0) {
+                        ret.add(b.data[col + (row - 1) * b.w]);
+                    }
+
+                    // bottom
+                    if (row < b.h - 1) {
+                        ret.add(b.data[col + (row + 1) * b.w]);
+                    }
+                }
+            }
+        }
+
+
+        ret.delete(id);
+        ret.delete(0);
+        ret.delete(1);
+
+        return ret;
+    }
+
+    const colors = ["#009E73", "#D55E01", "#0072B2", "#F0E442"];
+    const used_colors = {};
+
     const cells = grid_painter.querySelectorAll(".grid-cell");
     for (const cell of cells) {
         const r = +cell.dataset.row;
         const c = +cell.dataset.col;
         const id = board.data[c + r * board.w];
+        if (!used_colors[id]) {
+            const neighbours = get_neighbors(id);
+            const available_colors = [...colors];
+            for (const n of neighbours) {
+                if (used_colors[n]) {
+                    const index = available_colors.indexOf(used_colors[n]);
+                    console.assert(index >= 0);
+                    available_colors.splice(index, 1);
+                }
+            }
+
+            console.assert(available_colors.length >= 1);
+
+            // pick the least used color
+            const color_counter = {};
+            for (const color of Object.values(used_colors)) {
+                if (!color_counter[color]) {
+                    color_counter[color] = 0;
+                }
+                color_counter[color]++;
+            }
+
+            available_colors.sort((a, b) => {
+                return (color_counter[a] || 0) - (color_counter[b] || 0)
+            });
+
+            used_colors[id] = available_colors[0];
+        }
+
+        const color = used_colors[id];
+
         if (id >= PIECE_BASE) {
-            cell.style.backgroundColor = `hsl(${(id - PIECE_BASE) * (360 / shapes.length)}deg 55% 50%)`;
+            cell.style.backgroundColor = color;
             cell.textContent = id;
             cell.dataset.val = id;
         }
