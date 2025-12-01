@@ -16,6 +16,7 @@ onmessage = (e) => {
     }
 
     const { p, b } = e.data;
+    const start = performance.now();
 
     const piecesId = Array.from(new Set(p.map((val) => val.id)));
     log("Pieces count:", piecesId.length, piecesId);
@@ -29,6 +30,13 @@ onmessage = (e) => {
         }
 
         step_counter++;
+
+        if (step_counter % 1_000_000 === 0) {
+            const duration = Math.round(performance.now() - start) / 1000;
+            log("Steps:", step_counter,
+                "Time:", duration, "seconds.",
+            );
+        }
 
         for (let i = 0; i < p.length; i++) {
             const piece = p[i];
@@ -113,7 +121,6 @@ onmessage = (e) => {
         return false; // did not find solution, cannot proceed
     }
 
-    const start = performance.now();
     const solved = step([]);
     const end = performance.now();
 

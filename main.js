@@ -374,7 +374,8 @@ function display_solve_result(b) {
                 }
             }
 
-            console.assert(available_colors.length >= 1);
+            // NOTE: This greedy color filler cannot guarantee that all neighbours use only three colours.
+            // console.assert(available_colors.length >= 1);
 
             // pick the least used color
             const color_counter = {};
@@ -389,7 +390,7 @@ function display_solve_result(b) {
                 return (color_counter[a] || 0) - (color_counter[b] || 0)
             });
 
-            used_colors[id] = available_colors[0] || "red";
+            used_colors[id] = available_colors[0] || "salmon";
         }
 
         const color = used_colors[id];

@@ -16,11 +16,11 @@ fieldset {
     margin: 0.4em 0;
     user-select: none;
     color: transparent;
-    transition: 1s color;
+    transition: 0.4s color;
 }
 
 #grid_painter:hover {
-    color: #000;
+    color: #0005;
 }
 
 .grid-row {
