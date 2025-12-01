@@ -503,8 +503,9 @@ find_first.onclick = () => {
             for (const n of neighbours) {
                 if (used_colors[n]) {
                     const index = available_colors.indexOf(used_colors[n]);
-                    console.assert(index >= 0);
-                    available_colors.splice(index, 1);
+                    if (index >= 0) {
+                        available_colors.splice(index, 1);
+                    }
                 }
             }
 
@@ -523,7 +524,7 @@ find_first.onclick = () => {
                 return (color_counter[a] || 0) - (color_counter[b] || 0)
             });
 
-            used_colors[id] = available_colors[0];
+            used_colors[id] = available_colors[0] || "red";
         }
 
         const color = used_colors[id];
