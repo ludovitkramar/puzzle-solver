@@ -1,3 +1,5 @@
+const PIECE_BASE = 10;
+
 const grid_painter = document.querySelector("#grid_painter");
 const create_grid = document.querySelector("#create-grid");
 const grid_size_w = document.querySelector("#grid_size_w");
@@ -309,149 +311,12 @@ function update_all_shapes_preview() {
     return all_shapes_and_variants;
 }
 
-
 const find_first = document.getElementById("find_first");
 const solve_log = document.getElementById("solve_log");
 
-const PIECE_BASE = 10;
+const worker = new Worker("./worker.js");
 
-find_first.onclick = () => {
-    solve_log.replaceChildren();
-    function log(...parts) {
-        for (let i = 0; i < parts.length; i++) {
-            const p = parts[i];
-            if (typeof p === "object") {
-                parts[i] = JSON.stringify(p);
-            }
-        }
-
-        solve_log.textContent += parts.join(" ") + "\n";
-    }
-
-    const b = board;
-    // reset board
-    for (let i = 0; i < b.data.length; i++) {
-        if (b.data[i] !== 1) {
-            b.data[i] = 0;
-        }
-    }
-
-    const p = update_all_shapes_preview();
-
-    const piecesId = Array.from(new Set(p.map((val) => val.id)));
-    log("Pieces count:", piecesId.length, piecesId);
-    log("Variants count:", p.length);
-
-    let step_counter = 0;
-
-    function step(used_ids) {
-        if (used_ids.length === piecesId.length) {
-            return true; // found solution
-        }
-
-        step_counter++;
-
-        for (let i = 0; i < p.length; i++) {
-            const piece = p[i];
-            if (used_ids.includes(piece.id)) {
-                continue;
-            }
-
-            // 1. attempt to place the piece.
-            let placed_pos = null;
-            grid_place_loop: for (let y = 0; y <= (b.h - piece.h); y++) {
-                for (let x = 0; x <= (b.w - piece.w); x++) {
-                    let can_place = true;
-                    place_check: for (let px = 0; px < piece.w; px++) {
-                        for (let py = 0; py < piece.h; py++) {
-                            const px_board = px + x;
-                            const py_board = py + y;
-                            const board_value = b.data[px_board + py_board * b.w];
-                            const piece_value = piece.data[px + py * piece.w];
-                            if (piece_value !== 0 && board_value !== 0) {
-                                can_place = false;
-                                break place_check;
-                            }
-                        }
-                    }
-
-                    if (can_place) {
-                        placed_pos = { x, y };
-                        break grid_place_loop;
-                    }
-                }
-            }
-
-            // 2. continue the loop if placement failed.
-            if (!placed_pos) {
-                continue; // try with the next piece
-            }
-
-            // Write piece to board state
-            for (let px = 0; px < piece.w; px++) {
-                for (let py = 0; py < piece.h; py++) {
-                    const px_board = px + placed_pos.x;
-                    const py_board = py + placed_pos.y;
-                    const board_value = b.data[px_board + py_board * b.w];
-
-                    const piece_value = piece.data[px + py * piece.w];
-                    if (piece_value) {
-                        console.assert(board_value === 0);
-                        b.data[px_board + py_board * b.w] = PIECE_BASE + piece.id;
-                    }
-                }
-            }
-            // 3. add piece id to used ids when placement succeeds.
-            used_ids.push(piece.id);
-
-            // 4. recusively try adding another piece by calling: step(used_ids).
-            const ret = step(used_ids);
-
-            // 5. if the function returns true, return true, if it returns false, 
-            // remove the piece from the board, then continue the loop.
-            if (ret) { return ret; }
-            else {
-                // Remove piece id from used ids.
-                used_ids.splice(used_ids.indexOf(piece.id), 1);
-
-                // Remove piece from board state
-                for (let px = 0; px < piece.w; px++) {
-                    for (let py = 0; py < piece.h; py++) {
-                        const px_board = px + placed_pos.x;
-                        const py_board = py + placed_pos.y;
-                        const board_value = b.data[px_board + py_board * b.w];
-
-                        const piece_value = piece.data[px + py * piece.w];
-                        if (piece_value) {
-                            console.assert(board_value === PIECE_BASE + piece.id);
-                            b.data[px_board + py_board * b.w] = 0;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false; // did not find solution, cannot proceed
-    }
-
-    const start = performance.now();
-    const solved = step([]);
-    const end = performance.now();
-
-    const duration = Math.round(end - start);
-
-    if (solved) {
-        log("Success!");
-        log("Took", duration, "milliseconds.");
-        log("Took", step_counter, "tries.");
-        console.log("SUCCESS", step_counter);
-        window.print_board();
-    } else {
-        log("Failed to solve.");
-        console.error("Failed to solve.", step_counter);
-    }
-
-    // display final board state
+function display_solve_result(b) {
     function get_neighbors(id) {
         const ret = new Set();
         for (let row = 0; row < b.h; row++) {
@@ -496,7 +361,7 @@ find_first.onclick = () => {
     for (const cell of cells) {
         const r = +cell.dataset.row;
         const c = +cell.dataset.col;
-        const id = board.data[c + r * board.w];
+        const id = b.data[c + r * b.w];
         if (!used_colors[id]) {
             const neighbours = get_neighbors(id);
             const available_colors = [...colors];
@@ -536,6 +401,42 @@ find_first.onclick = () => {
         }
     }
 }
+
+find_first.onclick = () => {
+    document.body.style.pointerEvents = "none";
+
+    worker.onmessage = (ev) => {
+        switch (ev.data.type) {
+            case "log":
+                solve_log.textContent += ev.data.msg + "\n";
+                break;
+
+            case "result":
+                document.body.style.pointerEvents = "auto";
+                display_solve_result(ev.data.b);
+                break;
+
+            default:
+                console.error("Unknown data type.");
+                break;
+        }
+    }
+
+    solve_log.replaceChildren();
+
+    const b = board;
+    // reset board
+    for (let i = 0; i < b.data.length; i++) {
+        if (b.data[i] !== 1) {
+            b.data[i] = 0;
+        }
+    }
+
+    const p = update_all_shapes_preview();
+
+    worker.postMessage({ p, b });
+}
+
 
 window.print_board = () => {
     let table = "";

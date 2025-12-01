@@ -13,8 +13,14 @@ fieldset {
 #grid_painter {
     display: flex;
     flex-direction: column;
-    border: 1px solid #e0e0e0;
+    margin: 0.4em 0;
     user-select: none;
+    color: transparent;
+    transition: 1s color;
+}
+
+#grid_painter:hover {
+    color: #000;
 }
 
 .grid-row {
@@ -24,7 +30,7 @@ fieldset {
 .grid-cell {
     width: 20px;
     height: 20px;
-    border: 1px solid #d0d0d0;
+    border: 1px solid #333;
     display: flex;
     justify-content: center;
     align-items: center;
