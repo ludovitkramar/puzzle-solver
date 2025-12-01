@@ -3,6 +3,7 @@ const create_grid = document.querySelector("#create-grid");
 const grid_size_w = document.querySelector("#grid_size_w");
 const grid_size_h = document.querySelector("#grid_size_h");
 const save_grid = document.querySelector("#save_grid");
+const load_grid = document.querySelector("#load_grid");
 
 create_grid.onclick = initializeGrid;
 
@@ -84,7 +85,7 @@ function createGrid(parent, w_element, h_element, initial_data = undefined) {
 }
 
 let board;
-{
+function loadGrid() {
     let stored_board = localStorage.getItem("board");
     if (stored_board) {
         stored_board = JSON.parse(stored_board);
@@ -92,6 +93,9 @@ let board;
 
     board = createGrid(grid_painter, grid_size_w, grid_size_h, stored_board);
 }
+
+loadGrid();
+load_grid.onclick = loadGrid;
 
 function initializeGrid() {
     board = createGrid(grid_painter, grid_size_w, grid_size_h);
@@ -447,8 +451,18 @@ find_first.onclick = () => {
         console.error("Failed to solve.", step_counter);
     }
 
-
-    // TODO: display final board state
+    // display final board state
+    const cells = grid_painter.querySelectorAll(".grid-cell");
+    for (const cell of cells) {
+        const r = +cell.dataset.row;
+        const c = +cell.dataset.col;
+        const id = board.data[c + r * board.w];
+        if (id >= PIECE_BASE) {
+            cell.style.backgroundColor = `hsl(${(id - PIECE_BASE) * (360 / shapes.length)}deg 55% 50%)`;
+            cell.textContent = id;
+            cell.dataset.val = id;
+        }
+    }
 }
 
 window.print_board = () => {
