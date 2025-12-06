@@ -300,6 +300,35 @@ function update_all_shapes_preview() {
         const deduplicated = deduplicate(variants);
         const shape_previews = document.createElement("div");
         shape_previews.classList.add("shape-previews");
+
+        const up_button = document.createElement("button");
+        up_button.textContent = "Up";
+        const down_button = document.createElement("button");
+        down_button.textContent = "Down";
+        shape_previews.appendChild(up_button);
+        shape_previews.appendChild(down_button);
+
+        function swap_and_save(index, other) {
+            const temp = shapes[other];
+            shapes[other] = shapes[index];
+            shapes[index] = temp;
+
+            localStorage.setItem("shapes", JSON.stringify(shapes));
+            console.log("Saved shapes to local storage.");
+            update_all_shapes_preview();
+        }
+
+        up_button.onclick = () => { swap_and_save(k, k - 1); }
+        down_button.onclick = () => { swap_and_save(k, k + 1); }
+
+        if (k === 0) {
+            up_button.disabled = true;
+        }
+
+        if (k === shapes.length - 1) {
+            down_button.disabled = true;
+        }
+
         for (const variant of deduplicated) {
             shape_previews.appendChild(create_preview(variant));
         }
