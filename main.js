@@ -21,8 +21,10 @@ function createGrid(parent, w_element, h_element, initial_data = undefined) {
         throw new Error("invalid height.");
     }
 
-    w_element.value = w;
-    h_element.value = h;
+    if (w_element && h_element) {
+        w_element.value = w;
+        h_element.value = h;
+    }
 
     const grid_state = new Uint8Array(w * h);
     if (initial_data) {
@@ -341,11 +343,12 @@ function update_all_shapes_preview() {
 }
 
 const find_first = document.getElementById("find_first");
+const find_all = document.getElementById("find_all");
 const solve_log = document.getElementById("solve_log");
 
 const worker = new Worker("./worker.js");
 
-function display_solve_result(b) {
+function display_solve_result(b, parent = null) {
     function get_neighbors(id) {
         const ret = new Set();
         for (let row = 0; row < b.h; row++) {
@@ -386,7 +389,8 @@ function display_solve_result(b) {
     const colors = ["#009E73", "#D55E01", "#0072B2", "#F0E442"];
     const used_colors = {};
 
-    const cells = grid_painter.querySelectorAll(".grid-cell");
+    const p = parent || grid_painter;
+    const cells = p.querySelectorAll(".grid-cell");
     for (const cell of cells) {
         const r = +cell.dataset.row;
         const c = +cell.dataset.col;
@@ -465,6 +469,55 @@ find_first.onclick = () => {
     const p = update_all_shapes_preview();
 
     worker.postMessage({ p, b });
+}
+
+const solutions = document.getElementById("solutions");
+let solved_boards = [];
+
+find_all.onclick = () => {
+    document.body.style.pointerEvents = "none";
+    solved_boards = [];
+
+    worker.onmessage = (ev) => {
+        switch (ev.data.type) {
+            case "log":
+                solve_log.textContent += ev.data.msg + "\n";
+                break;
+
+            case "result":
+                const div = document.createElement("div");
+                const solved_board = ev.data.b;
+                const before_l = solved_boards.length;
+                solved_boards.push(solved_board);
+                solved_boards = deduplicate(solved_boards);
+                if (solved_boards.length > before_l) {
+                    createGrid(div, null, null, solved_board);
+                    solutions.appendChild(div);
+                    display_solve_result(solved_board, div);
+                } else {
+                    console.log("Ignoring duplicated solution.");
+                }
+                break;
+
+            default:
+                console.error("Unknown data type.");
+                break;
+        }
+    }
+
+    solve_log.replaceChildren();
+
+    const b = board;
+    // reset board
+    for (let i = 0; i < b.data.length; i++) {
+        if (b.data[i] !== 1) {
+            b.data[i] = 0;
+        }
+    }
+
+    const p = update_all_shapes_preview();
+
+    worker.postMessage({ p, b, all: true });
 }
 
 

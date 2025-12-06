@@ -74,3 +74,19 @@ fieldset {
 .preview-cell[data-active="true"] {
     background-color: #333;
 }
+
+#solutions {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+#solutions .grid-cell {
+    width: 6px;
+    height: 6px;
+    border: none;
+    color: transparent;
+}

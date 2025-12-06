@@ -37,12 +37,21 @@ onmessage = (e) => {
     log("Variants count:", p.length);
 
     let step_counter = 0;
+    const all = e.data.all;
+    let solution_count = 0;
 
     function step(used_ids) {
         // print_board();
 
         if (used_ids.length === piecesId.length) {
-            return true; // found solution
+            solution_count += 1;
+            postMessage({ type: "result", b });
+            if (all) {
+                log(`found ${solution_count} solutions, keep searching.`);
+                return false;
+            } else {
+                return true; // found solution
+            }
         }
 
         step_counter++;
@@ -143,7 +152,7 @@ onmessage = (e) => {
 
     const duration = Math.round(end - start);
 
-    if (solved) {
+    if (solved || solution_count > 0) {
         log("Success!");
         console.log("SUCCESS", step_counter);
     } else {
@@ -152,7 +161,5 @@ onmessage = (e) => {
     }
     log("Took", duration, "milliseconds.");
     log("Took", step_counter, "tries.");
-
-    postMessage({ type: "result", b })
 };
 
