@@ -18,6 +18,20 @@ onmessage = (e) => {
     const { p, b } = e.data;
     const start = performance.now();
 
+    function print_board() {
+        let table = "";
+        for (let row = 0; row < b.h; row++) {
+            let line = "";
+            for (let col = 0; col < b.w; col++) {
+                const value = b.data[col + row * b.w];
+                line += "[" + String(value).padStart("2", "0") + "]";
+            }
+            table += line;
+            table += "\n"
+        }
+        console.log(table);
+    }
+
     const piecesId = Array.from(new Set(p.map((val) => val.id)));
     log("Pieces count:", piecesId.length, piecesId);
     log("Variants count:", p.length);
@@ -25,6 +39,8 @@ onmessage = (e) => {
     let step_counter = 0;
 
     function step(used_ids) {
+        // print_board();
+
         if (used_ids.length === piecesId.length) {
             return true; // found solution
         }
@@ -57,6 +73,7 @@ onmessage = (e) => {
                             const piece_value = piece.data[px + py * piece.w];
                             if (piece_value !== 0 && board_value !== 0) {
                                 can_place = false;
+                                // console.log("Piece cannot be placed.");
                                 break place_check;
                             }
                         }
@@ -138,3 +155,4 @@ onmessage = (e) => {
 
     postMessage({ type: "result", b })
 };
+
