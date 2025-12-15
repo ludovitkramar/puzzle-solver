@@ -334,6 +334,18 @@ function update_all_shapes_preview() {
         for (const variant of deduplicated) {
             shape_previews.appendChild(create_preview(variant));
         }
+
+        const delete_button = document.createElement("button");
+        delete_button.textContent = "X";
+        delete_button.onclick = () => {
+            const index = k;
+            shapes.splice(index, 1);
+            const all_shapes_and_variants = update_all_shapes_preview();
+            localStorage.setItem("shapes", JSON.stringify(shapes));
+            console.log("Saved shapes to local storage.", { all_shapes_and_variants });
+        }
+        shape_previews.appendChild(delete_button);
+
         all_shapes.appendChild(shape_previews);
 
         all_shapes_and_variants.push(...deduplicated);
